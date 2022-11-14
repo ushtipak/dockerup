@@ -34,7 +34,13 @@
             <div class="py-2 py-lg-0">
               <ul class="navbar-nav">
                 <li class="nav-item">
-                  <a href="#steps" class="nav-link" aria-expanded="false" aria-haspopup="true">Steps</a>
+                  <a href="#about" class="nav-link" aria-expanded="false" aria-haspopup="true">About</a>
+                </li>
+                <li class="nav-item">
+                  <a href="#dockerize-me" class="nav-link" aria-expanded="false" aria-haspopup="true">Automated</a>
+                </li>
+                <li class="nav-item">
+                  <a href="#dockerize-manually" class="nav-link" aria-expanded="false" aria-haspopup="true">On Request</a>
                 </li>
                 <li class="nav-item">
                   <a href="#faq" class="nav-link" aria-expanded="false" aria-haspopup="true">FAQ</a>
@@ -62,51 +68,231 @@
           <div>
             <a href="#dockerize-me" class="btn btn-lg btn-primary btn-block mb-2">Dockerize my app</a>
           </div>
-          <small>We'll quickly get back to you</small>
         </div>
       </div>
       <div class="decoration-wrapper d-none d-sm-block">
         <div data-jarallax-element="0 50">
           <div class="decoration top middle-y scale-5">
-            <img class="bg-primary-2" src="assets/img/deco-blob.svg" alt="deco-blob decoration" data-inject-svg />
+            <img class="bg-primary-2" src="assets/img/deco-blob-1.svg" alt="deco-blob decoration" data-inject-svg />
           </div>
         </div>
       </div>
       <div class="divider">
-        <img src="assets/img/divider.svg" alt="divider graphic" data-inject-svg />
+        <img class="bg-primary-alt" src="assets/img/divider.svg" alt="divider graphic" data-inject-svg />
       </div>
     </section>
 
-    <section class="o-hidden" id="steps">
+    <section class="o-hidden bg-primary-alt" id="about">
       <div class="container pt-0 mt-3">
-        <div class="row text-center">
-          <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="100">
-            <div class="px-xl-2">
-              <div class="process-circle bg-primary mb-3 d-inline-flex">1</div>
-              <h4>Fill out requirements</h4>
+        <div class="row align-items-center justify-content-around">
+          <div class="col-md-5 pr-xl-4 mb-4 mb-md-0">
+            <h3 class="h1 text-primary-2">Dockerfile creation, free of charge</h3>
+            <p class="lead">How?</p>
+            <div class="mb-3">
               <p>
-                Tell us if you have something special that is required for your app (i.e. a system library) or a known limitation (e.g. app works only with <span class="bg-primary-alt">Node v10</span>)
+                <img src="assets/img/logo-bullet.svg"/><a href="#dockerize-me" class="hover-arrow"> Automated</a>
               </p>
+              <p>
+                <img src="assets/img/logo-bullet.svg"/><a href="#dockerize-manually" class="hover-arrow"> Manual</a>
+              </p>
+
+              <p class="lead">Why?</p>
+              <p>We have a separate project that helps devs get their app online quickly, with <span class="bg-primary text-light">Continuous Integration</span> pipeline and <span class="bg-primary text-light">Container Registry</span> included, but relies on the app being Dockerized... More Dockerized apps out there — more potential clients for our commercial project (in the works)</p>
+            </div>
+            <a href="https://rad12.io" class="hover-arrow"><img src="assets/img/rad12.svg" alt="rad12"/></a>
+          </div>
+          <div class="col-xl-5 col-md-6" data-aos="fade-left">
+            <img src="assets/img/containers.jpg" alt="Containers" class="rounded shadow-lg layer-1">
+            <div class="decoration top left scale-2 d-none d-md-block">
+              <img class="bg-primary-2" src="assets/img/deco-blob-2.svg" alt="deco-blob decoration" data-inject-svg />
+            </div>
+            <div class="decoration bottom middle-x scale-2">
+              <img class="bg-primary" src="assets/img/deco-dots-2.svg" alt="deco-dots decoration" data-inject-svg />
             </div>
           </div>
-          <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="200">
-            <div class="px-xl-2">
-              <div class="process-circle bg-primary-2 mb-3 d-inline-flex">2</div>
-              <h4>Add our account to the repo</h4>
-              <p>
-                <span class="bg-primary-alt">Settings: Collaborators</span> on GitHub, <span class="bg-primary-alt">Repository details: User and group access</span> on BitBucket, <span class="bg-primary-alt">Project information: Members</span> on GitLab — add our user: <span class="bg-primary text-light">dockerup-dev</span>
-              </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-primary-2 text-light o-hidden p-3">
+      <div class="row justify-content-center text-center">
+        <div class="col-xl-8 col-lg-9">
+          <div>
+            <h2 class="display-4 mx-xl-6">Auto Docker UP!</h2>
+          </div>
+          <p class="lead">
+            <div class="mb-1">Dynamically generate Dockerfile for your app</div>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="has-divider o-hidden" id="dockerize-me">
+      <div class="divider flip-y">
+        <img class="bg-primary-2" src="assets/img/divider.svg" alt="graphical divider" data-inject-svg />
+      </div>
+      <div class="container layer-2 mt-0">
+        <div class="row justify-content-center">
+          <div class="col-xl-6 col-lg-8">
+            <div>
+              <div class="form-group mb-3 formbuilder-required">
+                <label for="language">Programming language</label>
+                <select class="custom-select" name="language" id="language" onchange="dockerup();">
+                  <option selected></option>
+                  <option value="python">Python</option>
+                  <option value="go">Go</option>
+                  <option value="c">C</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="env">Environment variables (if any)</label>
+                <textarea class="form-control" name="env" id="env" rows="3" onchange="dockerup();"></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="ports">Port(s) to expose (if needed)</label>
+                <input type="text" name="ports" class="form-control" id="ports" aria-describedby="ports" placeholder="e.g. 8080,8090" onchange="dockerup();">
+              </div>
+            </div>
+            <hr>
+            <div>
+              <label for="dockerfile">Dockerfile</label>
+              <textarea class="form-control" name="notes" id="dockerfile" rows="20"></textarea>
             </div>
           </div>
-          <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="300">
-            <div class="px-xl-2">
-              <div class="process-circle bg-primary-3 mb-3 d-inline-flex">3</div>
-              <h4>Wait for your Dockerfile!</h4>
-              <p>
-                Based on your preference, await your app's Docker specification on your email or Git repo
-              </p>
+        </div>
+      </div>
+
+      <div class="decoration-wrapper d-none d-lg-block">
+        <div class="decoration top middle-y scale-2" data-jarallax-element="-50 -50">
+          <img class="bg-primary-2" src="assets/img/deco-ring.svg" alt="deco-ring decoration" data-inject-svg />
+        </div>
+        <div class="decoration middle-y right scale-2" data-jarallax-element="50 0">
+          <img class="bg-primary" src="assets/img/deco-dots-1.svg" alt="deco-dots decoration" data-inject-svg />
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-primary-2 text-light o-hidden p-3">
+      <div class="row justify-content-center text-center">
+        <div class="col-xl-8 col-lg-9">
+          <div>
+            <h2 class="display-4 mx-xl-6">Manual Docker UP!</h2>
+          </div>
+          <p class="lead">
+            <div class="mb-1">Request a hands-on Dockerfile creation, if automated one isn't sufficient for you</div>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="has-divider o-hidden" id="dockerize-manually">
+      <div class="divider flip-y">
+        <img class="bg-primary-2" src="assets/img/divider.svg" alt="graphical divider" data-inject-svg />
+      </div>
+      <div class="container layer-2 mt-0">
+        <div class="container pt-0 mt-3">
+          <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+              <div class="px-xl-2">
+                <div class="process-circle bg-primary mb-3 d-inline-flex">1</div>
+                <h4>Fill out requirements</h4>
+                <p>
+                  Tell us if you have something special that is required for your app (i.e. a system library) or a known limitation (e.g. app works only with <span class="bg-primary-alt">Node v10</span>)
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="200">
+              <div class="px-xl-2">
+                <div class="process-circle bg-primary-2 mb-3 d-inline-flex">2</div>
+                <h4>Add our account to the repo</h4>
+                <p>
+                  <span class="bg-primary-alt">Settings: Collaborators</span> on GitHub, <span class="bg-primary-alt">Repository details: User and group access</span> on BitBucket, <span class="bg-primary-alt">Project information: Members</span> on GitLab — add our user: <span class="bg-primary text-light">dockerup-dev</span>
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0" data-aos="fade-up" data-aos-delay="300">
+              <div class="px-xl-2">
+                <div class="process-circle bg-primary-3 mb-3 d-inline-flex">3</div>
+                <h4>Wait for your Dockerfile!</h4>
+                <p>
+                  Based on your preference, await your app's Docker specification on your email or Git repo
+                </p>
+              </div>
             </div>
           </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="col-xl-6 col-lg-8 mt-6">
+
+            <form action="https://usebasin.com/f/80aed50a3c29" method="POST" enctype="multipart/form-data" id="form">
+
+              <div class="form-group mb-3 formbuilder-required">
+                <label for="input-repository-url">Repository URL</label>
+                <input type="text" name="repo-url" class="form-control" id="input-repository-url" aria-describedby="input-repository-url" placeholder="e.g. https://github.com/username/repo">
+              </div>
+
+              <div class="form-group mb-3 formbuilder-required">
+                <label for="select-dockerfile-deliver">Deliver Dockerfile</label>
+                <select class="custom-select" name="dockerfile-deliver" id="select-dockerfile-deliver">
+                  <option selected></option>
+                  <option value="push-to-master">Push to master</option>
+                  <option value="push-to-a-new-branch">Push to a new branch</option>
+                  <option value="send-via-email">Send via Email</option>
+                </select>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="env-vars">ENV vars</label>
+                <textarea class="form-control" name="env-vars" id="input-env-vars" rows="5"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="input-port">Port(s) to expose (comma separated)</label>
+                <input type="text" name="ports" class="form-control" id="input-port" aria-describedby="input-port" placeholder="e.g. 8080,8090">
+              </div>
+
+              <div class="form-group">
+                <label for="textarea-notes">Specifics of any kind (required library versions, tools, build order)</label>
+                <textarea class="form-control" name="notes" id="textarea-notes" rows="3"></textarea>
+              </div>
+
+              <small class="form-text text-muted mb-1">Advanced Options</small>
+              <div class="custom-control custom-checkbox mb-1">
+                <input type="checkbox" name="advanced-unit-tests" class="custom-control-input" id="custom-checkbox-advanced-unit-tests">
+                <label class="custom-control-label" for="custom-checkbox-advanced-unit-tests">Unit Tests</label>
+              </div>
+              <div class="custom-control custom-checkbox mb-1">
+                <input type="checkbox" name="advanced-multi-stage-build" class="custom-control-input" id="custom-checkbox-advanced-multi-stage-build">
+                <label class="custom-control-label" for="custom-checkbox-advanced-multi-stage-build">Multi-stage Build</label>
+              </div>
+              <div class="custom-control custom-checkbox mb-3">
+                <input type="checkbox" name="advanced-distroless-container" class="custom-control-input" id="custom-checkbox-advanced-distroless-container">
+                <label class="custom-control-label" for="custom-checkbox-advanced-distroless-container">Distroless Container</label>
+              </div>
+
+              <div class="form-group mb-3 formbuilder-required">
+                <input type="email" name="email" placeholder="Email Address" class="form-control">
+              </div>
+
+              <div class="form-group text-center">
+                <button class="btn btn-lg btn-primary btn-block mb-2" type="submit">Dockerize Me</button>
+                <small>We'll quickly get back to you</small>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="decoration-wrapper d-none d-lg-block">
+        <div class="decoration top middle-y scale-2" data-jarallax-element="-50 -50">
+          <img class="bg-primary-2" src="assets/img/deco-ring.svg" alt="deco-ring decoration" data-inject-svg />
+        </div>
+        <div class="decoration middle-y right scale-2" data-jarallax-element="50 0">
+          <img class="bg-primary" src="assets/img/deco-dots-1.svg" alt="deco-dots decoration" data-inject-svg />
         </div>
       </div>
     </section>
@@ -128,7 +314,7 @@
                 <div class="collapse" id="panel-1">
                   <div class="pt-3">
                     <p class="mb-0">
-                      Yup, 100% FREE!
+                      Yup, it's 100% FREE!
                     </p>
                   </div>
                 </div>
@@ -141,7 +327,7 @@
                 <div class="collapse" id="panel-2">
                   <div class="pt-3">
                     <p class="mb-3">
-                      As mentioned it <a href="#steps">Steps</a> — simply fill out what you need and add our user (<span class="bg-primary text-light">dockerup-dev</span>) as a contributor to your repo
+                      If <a href="#dockerize-me">Automated</a> process is not enough for your use case – follow <a href="#dockerize-manually">Manual</a> steps — simply fill out what you need and add our user (<span class="bg-primary text-light">dockerup-dev</span>) as a contributor to your repo
                       <ul>
                         <li>GitHub: <img class="rounded shadow-3d" src="assets/img/user-github.png" alt="github account"/></li>
                         <li class="mb-3">GitLab: <img class="rounded shadow-3d" src="assets/img/user-gitlab.png" alt="gitlab account"/></li>
@@ -226,83 +412,6 @@
       </div>
     </section>
 
-    <section class="o-hidden" id="dockerize-me">
-      <div class="container layer-2 mt-3">
-        <div class="row justify-content-center text-center mb-6">
-          <div class="col-xl-8 col-lg-9">
-            <h2 class="display-4 mx-xl-6">Ready for Docker?</h2>
-          </div>
-        </div>
-        <div class="row justify-content-center">
-          <div class="col-xl-6 col-lg-8">
-
-            <form action="https://usebasin.com/f/80aed50a3c29" method="POST" enctype="multipart/form-data" id="form">
-
-              <div class="form-group mb-3 formbuilder-required">
-                <label for="input-repository-url">Repository URL</label>
-                <input type="text" name="repo-url" class="form-control" id="input-repository-url" aria-describedby="input-repository-url" placeholder="e.g. https://github.com/username/repo">
-              </div>
-
-              <div class="form-group mb-3 formbuilder-required">
-                <label for="select-dockerfile-deliver">Deliver Dockerfile</label>
-                <select class="custom-select" name="dockerfile-deliver" id="select-dockerfile-deliver">
-                  <option selected></option>
-                  <option value="push-to-master">Push to master</option>
-                  <option value="push-to-a-new-branch">Push to a new branch</option>
-                  <option value="send-via-email">Send via Email</option>
-                </select>
-              </div>
-
-              <div class="form-group mb-3">
-                <label for="input-env-vars">ENV vars (comma separated, if any)</label>
-                <input type="text" name="env-vars" class="form-control" id="input-env-vars" aria-describedby="input-env-vars" placeholder="i.e. DEBUG,CONNECTION_TIMEOUT">
-              </div>
-
-              <div class="form-group">
-                <label for="textarea-notes">Specifics of any kind (required library versions, tools, build order)</label>
-                <textarea class="form-control" name="notes" id="textarea-notes" rows="3"></textarea>
-              </div>
-
-              <small class="form-text text-muted mb-1">Advanced Options</small>
-              <div class="custom-control custom-checkbox mb-1">
-                <input type="checkbox" name="advanced-unit-tests" class="custom-control-input" id="custom-checkbox-advanced-unit-tests">
-                <label class="custom-control-label" for="custom-checkbox-advanced-unit-tests">Unit Tests</label>
-              </div>
-              <div class="custom-control custom-checkbox mb-1">
-                <input type="checkbox" name="advanced-multi-stage-build" class="custom-control-input" id="custom-checkbox-advanced-multi-stage-build">
-                <label class="custom-control-label" for="custom-checkbox-advanced-multi-stage-build">Multi-stage Build</label>
-              </div>
-              <div class="custom-control custom-checkbox mb-3">
-                <input type="checkbox" name="advanced-distroless-container" class="custom-control-input" id="custom-checkbox-advanced-distroless-container">
-                <label class="custom-control-label" for="custom-checkbox-advanced-distroless-container">Distroless Container</label>
-              </div>
-
-              <div class="form-group mb-3 formbuilder-required">
-                <input type="email" name="email" placeholder="Email Address" class="form-control">
-              </div>
-
-              <div class="form-group text-center">
-                <button class="btn btn-lg btn-primary btn-block mb-2" type="submit">Dockerize Me</button>
-                <small>We'll quickly get back to you</small>
-              </div>
-
-            </form>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="decoration-wrapper d-none d-lg-block">
-        <div class="decoration top middle-y scale-2" data-jarallax-element="-50 -50">
-          <img class="bg-primary-2" src="assets/img/deco-ring.svg" alt="deco-ring decoration" data-inject-svg />
-        </div>
-        <div class="decoration middle-y right scale-2" data-jarallax-element="50 0">
-          <img class="bg-primary" src="assets/img/deco-dots.svg" alt="deco-dots decoration" data-inject-svg />
-        </div>
-      </div>
-
-    </section>
-
     <footer class="p-4 bg-primary-3 text-light" id="footer">
       <div class="container">
         <div class="row justify-content-center">
@@ -371,6 +480,8 @@
     <script type="text/javascript">
       window.addEventListener("load", function () {    document.querySelector('body').classList.add('loaded');  });
     </script>
+    <!-- Custom, uber complex, Dockerfile creator script :) -->
+    <script type="text/javascript" src="assets/js/dockerup.js"></script>
 
   </body>
 
