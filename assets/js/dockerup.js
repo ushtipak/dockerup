@@ -54,24 +54,26 @@ function dockerup() {
                  'COPY --from=builder /build/app .\n' +
                  'ENTRYPOINT ["./app"]'
 
-  switch(language) {
-    case 'python':
-      buildsAndDependencies = pythonBuildSpec;
-      envPortsAndRun = envAndPorts + pythonRunSpec;
-      break;
-    case 'go':
-      buildsAndDependencies = goBuildSpec;
-      envPortsAndRun = envAndPorts + goRunSpec;
-      break;
-    case 'c':
-      buildsAndDependencies = cBuildSpec;
-      envPortsAndRun = envAndPorts + cRunSpec;
-      break;
-    default:
-  }
+  if (language != '') {
+    switch(language) {
+      case 'python':
+        buildsAndDependencies = pythonBuildSpec;
+        envPortsAndRun = envAndPorts + pythonRunSpec;
+        break;
+      case 'go':
+        buildsAndDependencies = goBuildSpec;
+        envPortsAndRun = envAndPorts + goRunSpec;
+        break;
+      case 'c':
+        buildsAndDependencies = cBuildSpec;
+        envPortsAndRun = envAndPorts + cRunSpec;
+        break;
+      default:
+    }
 
-  var dockerfile = `# build\n${buildsAndDependencies}\n\n# run\n${envPortsAndRun}\n\n# made with ❤️ on Docker UP!\n`;
-  dockerfileText.innerHTML = dockerfile;
-  Prism.highlightElement(dockerfileText);
+    var dockerfile = `# build\n${buildsAndDependencies}\n\n# run\n${envPortsAndRun}\n\n# made with ❤️ on Docker UP!\n`;
+    dockerfileText.innerHTML = dockerfile;
+    Prism.highlightElement(dockerfileText);
+  }
 }
 
