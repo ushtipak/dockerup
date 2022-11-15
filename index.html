@@ -37,9 +37,6 @@
                   <a href="#about" class="nav-link" aria-expanded="false" aria-haspopup="true">About</a>
                 </li>
                 <li class="nav-item">
-                  <a href="#dockerize-me" class="nav-link" aria-expanded="false" aria-haspopup="true">Automated</a>
-                </li>
-                <li class="nav-item">
                   <a href="#dockerize-manually" class="nav-link" aria-expanded="false" aria-haspopup="true">On Request</a>
                 </li>
                 <li class="nav-item">
@@ -157,8 +154,7 @@
             </div>
             <hr>
             <div>
-              <label for="dockerfile">Dockerfile</label>
-              <textarea class="form-control" name="notes" id="dockerfile" rows="20"></textarea>
+              <pre class="language-docker"><code id="dockerfile" class="language-docker"></code></pre>
             </div>
           </div>
         </div>
@@ -482,7 +478,6 @@
     </script>
     <!-- Custom, uber complex, Dockerfile creator script :) -->
     <script type="text/javascript" src="assets/js/dockerup.js"></script>
-
   </body>
 
 </html>

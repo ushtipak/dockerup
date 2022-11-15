@@ -71,7 +71,7 @@ function dockerup() {
   }
 
   var dockerfile = `# build\n${buildsAndDependencies}\n\n# run\n${envPortsAndRun}\n\n# made with ❤️ on Docker UP!\n`;
-  dockerfileText.value = dockerfile;
-
+  dockerfileText.innerHTML = dockerfile;
+  Prism.highlightElement(dockerfileText);
 }
 
