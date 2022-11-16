@@ -17,8 +17,10 @@ function dockerup() {
   };
   if (ports != '') {
     ports.split(",").forEach((kv) => {
-      envAndPorts += `EXPOSE ${kv}\n`;
-    }) ;
+      if (kv != '') {
+        envAndPorts += `EXPOSE ${kv}\n`;
+      }
+    });
   };
 
   var pythonBuildSpec = 'FROM python:3.10-alpine\n'                             +

@@ -144,17 +144,20 @@
 
               <div class="mb-3">
                 <label for="env">Environment variables (if any)</label>
-                <textarea class="form-control" name="env" id="env" rows="3" onchange="dockerup();"></textarea>
+                <textarea class="form-control" name="env" id="env" rows="3" onkeyup="dockerup();"></textarea>
               </div>
 
               <div class="mb-3">
                 <label for="ports">Port(s) to expose (if needed)</label>
-                <input type="text" name="ports" class="form-control" id="ports" aria-describedby="ports" placeholder="e.g. 8080,8090" onchange="dockerup();">
+                <input type="text" name="ports" class="form-control" id="ports" aria-describedby="ports" placeholder="e.g. 8080,8090" onkeyup="dockerup();">
               </div>
             </div>
             <hr>
             <div>
               <pre class="language-docker"><code id="dockerfile" class="language-docker"></code></pre>
+            </div>
+            <div>
+              <button class="btn btn-lg btn-primary btn-block mb-2" onClick="(function(){ navigator.clipboard.writeText(document.getElementById('dockerfile').innerText); return false;})();return false;">Copy to clipboard</button>
             </div>
           </div>
         </div>
