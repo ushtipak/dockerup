@@ -1,5 +1,6 @@
 function hideUnused() {
   document.getElementById("hidden-py").setAttribute("hidden", "");
+  document.getElementById("hidden-go").setAttribute("hidden", "");
 }
 
 function dockerup() {
@@ -34,55 +35,53 @@ function dockerup() {
 
     switch(language) {
       case 'python':
+        if (app == '') {app = 'app.py'}
         document.getElementById("hidden-py").removeAttribute("hidden");
         document.getElementById('app').placeholder = "e.g. app.py";
         var pyVersion = document.getElementById('py-version').value;
         var pyRequirements = document.getElementById('py-requirements').value;
-        if (app == '') {
-          app = 'app.py'
-        }
 
-        var pythonBuildSpec = `FROM python:${pyVersion}-alpine\n`                             +
-                              'WORKDIR /app\n'                                        +
-                              'RUN apk add build-base\n'                              +
-                              'COPY . .\n'                                            +
+        var pythonBuildSpec = `FROM python:${pyVersion}-alpine\n` +
+                              'WORKDIR /app\n'                    +
+                              'RUN apk add build-base\n'          +
+                              'COPY . .\n'                        +
                               'ENV PYTHONUNBUFFERED=1';
-        var pythonBuildVenv = 'ENV VIRTUAL_ENV=/venv\n'                               +
-                              'RUN python3.10 -m venv $VIRTUAL_ENV\n'                 +
-                              'ENV PATH="$VIRTUAL_ENV/bin:$PATH"\n'                   +
-                              'RUN pip3 install --upgrade pip\n'                      +
-                              'RUN pip3 install --no-cache-dir wheel\n'               +
-                              'RUN pip3 install --no-cache-dir -r requirements.txt'
-        var pythonRunSpec = `CMD ["python3", "${app}"]`
+        var pythonBuildVenv = 'ENV VIRTUAL_ENV=/venv\n'                              +
+                              'RUN python -m venv $VIRTUAL_ENV\n'                    +
+                              'ENV PATH="$VIRTUAL_ENV/bin:$PATH"\n'                  +
+                              'RUN pip3 install --upgrade pip\n'                     +
+                              'RUN pip3 install --no-cache-dir wheel\n'              +
+                              'RUN pip3 install --no-cache-dir -r requirements.txt';
+        var pythonRunSpec = `ENTRYPOINT ["python", "${app}"]`
 
 
-        pyRequirements != '' ? buildsAndDependencies = pythonBuildSpec + '\n' + pythonBuildVenv : buildsAndDependencies = pythonBuildSpec
+        pyRequirements != '' ? buildsAndDependencies = pythonBuildSpec + '\n' + pythonBuildVenv : buildsAndDependencies = pythonBuildSpec;
         envPortsAndRun = envAndPorts + pythonRunSpec;
         break;
 
       case 'go':
-        if (app == '') {
-          app = 'main.go'
-        }
-
-        var goBuildSpec = 'FROM golang:alpine AS builder\n' +
-                          'WORKDIR /build\n'                  +
-                          'RUN apk add build-base\n'        +
-                          'COPY . .\n'                      +
-                          `RUN go build -o app ${app}`
-        var goRunSpec = 'FROM alpine:latest\n'         +
-                        'COPY --from=builder /build .\n' +
-                        'CMD ["./app"]'
-
-        buildsAndDependencies = goBuildSpec;
-        envPortsAndRun = envAndPorts + goRunSpec;
+        if (app == '') {app = 'main.go'}
+        document.getElementById("hidden-go").removeAttribute("hidden");
         document.getElementById('app').placeholder = "e.g. cmd/app-name/main.go";
+        var goVersion = document.getElementById('go-version').value;
+        var goModules = document.getElementById('go-modules').value;
+
+        var goBuildBase = `FROM golang:${goVersion}-alpine AS builder\n` +
+                          'WORKDIR /build\n'                             +
+                          'RUN apk add build-base\n'                     +
+                          'COPY . .';
+        var goBuildModules = 'RUN go mod download';
+        var goBuildFinal = `RUN go build -o app ${app}`
+        var goRunSpec = 'FROM alpine:latest\n'           +
+                        'COPY --from=builder /build .\n' +
+                        'ENTRYPOINT ["./app"]';
+
+        goModules != '' ? buildsAndDependencies = goBuildBase + '\n' + goBuildModules + '\n' + goBuildFinal : buildsAndDependencies = goBuildBase + '\n' + goBuildFinal;
+        envPortsAndRun = envAndPorts + goRunSpec;
         break;
 
       case 'c':
-        if (app == '') {
-          app = 'main.c'
-        }
+        if (app == '') {app = 'main.c'}
 
         var cBuildSpec = 'FROM gcc:latest AS builder\n' +
                          'WORKDIR /build\n'             +
