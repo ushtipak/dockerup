@@ -2,6 +2,7 @@ function hideUnused() {
   document.getElementById("hidden-py").setAttribute("hidden", "");
   document.getElementById("hidden-go").setAttribute("hidden", "");
   document.getElementById("hidden-node").setAttribute("hidden", "");
+  document.getElementById("hidden-ruby").setAttribute("hidden", "");
 }
 
 function dockerup() {
@@ -97,6 +98,22 @@ function dockerup() {
 
         nodeEnv == 'production' ? buildsAndDependencies = nodeBuildSpec + ' --production' : buildsAndDependencies = nodeBuildSpec;
         envPortsAndRun = envAndPorts + nodeRunSpec;
+        break;
+
+      case 'ruby':
+        if (app == '') {app = 'main.rb'}
+        document.getElementById("hidden-ruby").removeAttribute("hidden");
+        document.getElementById('app').placeholder = "e.g. main.rb";
+        var rubyVersion = document.getElementById('ruby-version').value;
+        var rubyGemfile = document.getElementById('ruby-gemfile').value;
+
+        var rubyBuildSpec = `FROM ruby:${rubyVersion}-alpine\n` +
+                            'WORKDIR /app\n'                    +
+                            'COPY . .'
+        var rubyRunSpec = `ENTRYPOINT ["ruby", "${app}"]`
+
+        rubyGemfile != '' ? buildsAndDependencies = rubyBuildSpec + '\nRUN bundle install --without development test' : buildsAndDependencies = rubyBuildSpec;
+        envPortsAndRun = envAndPorts + rubyRunSpec;
         break;
 
       case 'c':
