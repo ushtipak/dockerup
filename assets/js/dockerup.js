@@ -3,6 +3,7 @@ function hideUnused() {
   document.getElementById("hidden-go").setAttribute("hidden", "");
   document.getElementById("hidden-node").setAttribute("hidden", "");
   document.getElementById("hidden-ruby").setAttribute("hidden", "");
+  document.getElementById("hidden-perl").setAttribute("hidden", "");
 }
 
 function dockerup() {
@@ -114,6 +115,22 @@ function dockerup() {
 
         rubyGemfile != '' ? buildsAndDependencies = rubyBuildSpec + '\nRUN bundle install --without development test' : buildsAndDependencies = rubyBuildSpec;
         envPortsAndRun = envAndPorts + rubyRunSpec;
+        break;
+
+      case 'perl':
+        if (app == '') {app = 'main.pl'}
+        document.getElementById("hidden-perl").removeAttribute("hidden");
+        document.getElementById('app').placeholder = "e.g. main.rb";
+        var perlVersion = document.getElementById('perl-version').value;
+        var perlModules = document.getElementById('perl-modules').value;
+
+        var perlBuildSpec = `FROM perl:${perlVersion}-slim\n` +
+                            'WORKDIR /app\n'                    +
+                            'COPY . .'
+        var perlRunSpec = `ENTRYPOINT ["perl", "${app}"]`
+
+        perlModules != '' ? buildsAndDependencies = perlBuildSpec + '\nRUN cpanm --installdeps .' : buildsAndDependencies = perlBuildSpec;
+        envPortsAndRun = envAndPorts + perlRunSpec;
         break;
 
       case 'c':
