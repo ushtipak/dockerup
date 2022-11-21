@@ -134,6 +134,20 @@ function dockerup() {
         document.getElementById('app').placeholder = "e.g. main.c";
         break;
 
+      case 'elixir':
+        if (app == '') {app = 'phx.server'}
+
+        var elixirBuildSpec = 'FROM elixir:latest\n' +
+                              'WORKDIR /app\n'       +
+                              'COPY . .\n'           +
+                              'RUN mix local.hex --force'
+        var elixirRunSpec = `ENTRYPOINT ["mix", "${app}"]`
+
+        buildsAndDependencies = elixirBuildSpec;
+        envPortsAndRun = envAndPorts + elixirRunSpec;
+        document.getElementById('app').placeholder = "e.g. phx.server";
+        break;
+
       default:
     }
 
