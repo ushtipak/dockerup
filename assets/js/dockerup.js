@@ -1,6 +1,7 @@
 function hideUnused() {
   document.getElementById("hidden-py").setAttribute("hidden", "");
   document.getElementById("hidden-go").setAttribute("hidden", "");
+  document.getElementById("hidden-node").setAttribute("hidden", "");
 }
 
 function dockerup() {
@@ -78,6 +79,24 @@ function dockerup() {
 
         goModules != '' ? buildsAndDependencies = goBuildBase + '\n' + goBuildModules + '\n' + goBuildFinal : buildsAndDependencies = goBuildBase + '\n' + goBuildFinal;
         envPortsAndRun = envAndPorts + goRunSpec;
+        break;
+
+      case 'node':
+        if (app == '') {app = 'server.js'}
+        document.getElementById("hidden-node").removeAttribute("hidden");
+        document.getElementById('app').placeholder = "e.g. server.js";
+        var nodeVersion = document.getElementById('node-version').value;
+        var nodeEnv = document.getElementById('node-env').value;
+
+        var nodeBuildSpec = `FROM node:${nodeVersion}-alpine\n` +
+                            'WORKDIR /app\n'                    +
+                            'COPY . .\n'                        +
+                            `ENV NODE_ENV=${nodeEnv}\n`         +
+                            'RUN npm install'
+        var nodeRunSpec = `ENTRYPOINT ["node", "${app}"]`
+
+        nodeEnv == 'production' ? buildsAndDependencies = nodeBuildSpec + ' --production' : buildsAndDependencies = nodeBuildSpec;
+        envPortsAndRun = envAndPorts + nodeRunSpec;
         break;
 
       case 'c':
