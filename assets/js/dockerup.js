@@ -1,46 +1,46 @@
-function hideUnused() {
-  document.getElementById("hidden-py").setAttribute("hidden", "");
-  document.getElementById("hidden-go").setAttribute("hidden", "");
-  document.getElementById("hidden-node").setAttribute("hidden", "");
-  document.getElementById("hidden-ruby").setAttribute("hidden", "");
-  document.getElementById("hidden-perl").setAttribute("hidden", "");
+// Hide additional options for specific languags (versions, dependencies...)
+function hideUnusedOptions() {
+  const languages = ["py", "go", "node", "ruby", "perl"];
+  languages.forEach(
+    (l) => {document.getElementById(`hidden-${l}`).setAttribute("hidden", "");}
+    );
 }
 
 function dockerup() {
-  var dockerfileText = document.getElementById('dockerfile');
-  var language = document.getElementById('language').value;
-  var app = document.getElementById('app').value;
-  var env = document.getElementById('env').value;
-  var ports = document.getElementById('ports').value;
+  var dockerfileText = document.getElementById("dockerfile");
+  var language = document.getElementById("language").value;
+  var app = document.getElementById("app").value;
+  var env = document.getElementById("env").value;
+  var ports = document.getElementById("ports").value;
 
   var buildsAndDependencies;
-  var envAndPorts = '';
+  var envAndPorts = "";
   var envPortsAndRun;
 
-  if (env != '') {
+  if (env != "") {
     env.split(/\r?\n/).forEach((kv) => {
-      if (kv != '') {
+      if (kv != "") {
         envAndPorts += `ENV ${kv}\n`;
       }
     });
-  };
-  if (ports != '') {
+  }
+  if (ports != "") {
     ports.split(",").forEach((kv) => {
-      if (kv != '') {
+      if (kv != "") {
         envAndPorts += `EXPOSE ${kv}\n`;
       }
     });
-  };
+  }
 
   // if language is chosen, pre-hide specific, non-selected options
-  if (language != '') {
-    hideUnused();
+  if (language != "") {
+    hideUnusedOptions();
 
     switch(language) {
-      case 'python':
-        if (app == '') {app = 'app.py'}
+      case "python":
+        if (app == "") {app = "app.py";}
         document.getElementById("hidden-py").removeAttribute("hidden");
-        document.getElementById('app').placeholder = "e.g. app.py";
+
         var pyVersion = document.getElementById('py-version').value;
         var pyRequirements = document.getElementById('py-requirements').value;
 
@@ -55,17 +55,15 @@ function dockerup() {
                               'RUN pip3 install --upgrade pip\n'                     +
                               'RUN pip3 install --no-cache-dir wheel\n'              +
                               'RUN pip3 install --no-cache-dir -r requirements.txt';
-        var pythonRunSpec = `ENTRYPOINT ["python", "${app}"]`
+        var pythonRunSpec = `ENTRYPOINT ["python", "${app}"]`;
 
-
-        pyRequirements != '' ? buildsAndDependencies = pythonBuildSpec + '\n' + pythonBuildVenv : buildsAndDependencies = pythonBuildSpec;
+        if (pyRequirements != "") {buildsAndDependencies = pythonBuildSpec + "\n" + pythonBuildVenv;} else {buildsAndDependencies = pythonBuildSpec;}
         envPortsAndRun = envAndPorts + pythonRunSpec;
         break;
 
-      case 'go':
-        if (app == '') {app = 'main.go'}
+      case "go":
+        if (app == "") {app = "cmd/app-name/main.go";}
         document.getElementById("hidden-go").removeAttribute("hidden");
-        document.getElementById('app').placeholder = "e.g. cmd/app-name/main.go";
         var goVersion = document.getElementById('go-version').value;
         var goModules = document.getElementById('go-modules').value;
 
@@ -73,20 +71,19 @@ function dockerup() {
                           'WORKDIR /build\n'                             +
                           'RUN apk add build-base\n'                     +
                           'COPY . .';
-        var goBuildModules = 'RUN go mod download';
-        var goBuildFinal = `RUN go build -o app ${app}`
-        var goRunSpec = 'FROM alpine:latest\n'           +
-                        'COPY --from=builder /build .\n' +
+        var goBuildModules = "RUN go mod download";
+        var goBuildFinal = `RUN go build -o app ${app}`;
+        var goRunSpec = "ROM alpine:latest\n"            +
+                        "COPY --from=builder /build .\n" +
                         'ENTRYPOINT ["./app"]';
 
-        goModules != '' ? buildsAndDependencies = goBuildBase + '\n' + goBuildModules + '\n' + goBuildFinal : buildsAndDependencies = goBuildBase + '\n' + goBuildFinal;
+        if (goModules != "") {buildsAndDependencies = goBuildBase + "\n" + goBuildModules + "\n" + goBuildFinal;} else {buildsAndDependencies = goBuildBase + "\n" + goBuildFinal;}
         envPortsAndRun = envAndPorts + goRunSpec;
         break;
 
-      case 'node':
-        if (app == '') {app = 'server.js'}
+      case "node":
+        if (app == "") {app = "server.js";}
         document.getElementById("hidden-node").removeAttribute("hidden");
-        document.getElementById('app').placeholder = "e.g. server.js";
         var nodeVersion = document.getElementById('node-version').value;
         var nodeEnv = document.getElementById('node-env').value;
 
@@ -94,80 +91,77 @@ function dockerup() {
                             'WORKDIR /app\n'                    +
                             'COPY . .\n'                        +
                             `ENV NODE_ENV=${nodeEnv}\n`         +
-                            'RUN npm install'
-        var nodeRunSpec = `ENTRYPOINT ["node", "${app}"]`
+                            'RUN npm install';
+        var nodeRunSpec = `ENTRYPOINT ["node", "${app}"]`;
 
-        nodeEnv == 'production' ? buildsAndDependencies = nodeBuildSpec + ' --production' : buildsAndDependencies = nodeBuildSpec;
+        if (nodeEnv == "production") {buildsAndDependencies = nodeBuildSpec + ' --production';} else {buildsAndDependencies = nodeBuildSpec;}
         envPortsAndRun = envAndPorts + nodeRunSpec;
         break;
 
-      case 'ruby':
-        if (app == '') {app = 'main.rb'}
+      case "ruby":
+        if (app == "") {app = "main.rb";}
         document.getElementById("hidden-ruby").removeAttribute("hidden");
-        document.getElementById('app').placeholder = "e.g. main.rb";
         var rubyVersion = document.getElementById('ruby-version').value;
         var rubyGemfile = document.getElementById('ruby-gemfile').value;
 
         var rubyBuildSpec = `FROM ruby:${rubyVersion}-alpine\n` +
-                            'WORKDIR /app\n'                    +
-                            'COPY . .'
-        var rubyRunSpec = `ENTRYPOINT ["ruby", "${app}"]`
+                            "WORKDIR /app\n"                    +
+                            "COPY . .";
+        var rubyRunSpec = `ENTRYPOINT ["ruby", "${app}"]`;
 
-        rubyGemfile != '' ? buildsAndDependencies = rubyBuildSpec + '\nRUN bundle install --without development test' : buildsAndDependencies = rubyBuildSpec;
+        if (rubyGemfile != "") {buildsAndDependencies = rubyBuildSpec + '\nRUN bundle install --without development test';} else {buildsAndDependencies = rubyBuildSpec;}
         envPortsAndRun = envAndPorts + rubyRunSpec;
         break;
 
-      case 'perl':
-        if (app == '') {app = 'main.pl'}
+      case "perl":
+        if (app == "") {app = "main.pl";}
         document.getElementById("hidden-perl").removeAttribute("hidden");
-        document.getElementById('app').placeholder = "e.g. main.rb";
-        var perlVersion = document.getElementById('perl-version').value;
-        var perlModules = document.getElementById('perl-modules').value;
+        var perlVersion = document.getElementById("perl-version").value;
+        var perlModules = document.getElementById("perl-modules").value;
 
         var perlBuildSpec = `FROM perl:${perlVersion}-slim\n` +
-                            'WORKDIR /app\n'                    +
-                            'COPY . .'
-        var perlRunSpec = `ENTRYPOINT ["perl", "${app}"]`
+                            "WORKDIR /app\n"                  +
+                            "COPY . .";
+        var perlRunSpec = `ENTRYPOINT ["perl", "${app}"]`;
 
-        perlModules != '' ? buildsAndDependencies = perlBuildSpec + '\nRUN cpanm --installdeps .' : buildsAndDependencies = perlBuildSpec;
+        if (perlModules != "") {buildsAndDependencies = perlBuildSpec + "\nRUN cpanm --installdeps .";} else {buildsAndDependencies = perlBuildSpec;}
         envPortsAndRun = envAndPorts + perlRunSpec;
         break;
 
-      case 'c':
-        if (app == '') {app = 'main.c'}
+      case "c":
+        if (app == "") {app = "main.c";}
 
         var cBuildSpec = 'FROM gcc:latest AS builder\n' +
-                         'WORKDIR /build\n'             +
-                         'COPY . .\n'                   +
-                         `RUN gcc -o app ${app}`
-        var cRunSpec = 'FROM alpine:latest\n'               +
-                       'WORKDIR /app\n'                     +
-                       'RUN apk add libc6-compat\n'         +
-                       'COPY --from=builder /build/app .\n' +
-                       'ENTRYPOINT ["./app"]'
+                         "WORKDIR /build\n"             +
+                         "COPY . .\n"                   +
+                         `RUN gcc -o app ${app}`;
+        var cRunSpec = "FROM alpine:latest\n"               +
+                       "WORKDIR /app\n"                     +
+                       "RUN apk add libc6-compat\n"         +
+                       "COPY --from=builder /build/app .\n" +
+                       'ENTRYPOINT ["./app"]';
 
         buildsAndDependencies = cBuildSpec;
         envPortsAndRun = envAndPorts + cRunSpec;
-        document.getElementById('app').placeholder = "e.g. main.c";
         break;
 
-      case 'elixir':
-        if (app == '') {app = 'phx.server'}
+      case "elixir":
+        if (app == "") {app = "phx.server";}
 
         var elixirBuildSpec = 'FROM elixir:latest\n' +
                               'WORKDIR /app\n'       +
                               'COPY . .\n'           +
-                              'RUN mix local.hex --force'
-        var elixirRunSpec = `ENTRYPOINT ["mix", "${app}"]`
+                              'RUN mix local.hex --force';
+        var elixirRunSpec = `ENTRYPOINT ["mix", "${app}"]`;
 
         buildsAndDependencies = elixirBuildSpec;
         envPortsAndRun = envAndPorts + elixirRunSpec;
-        document.getElementById('app').placeholder = "e.g. phx.server";
         break;
 
       default:
     }
 
+    document.getElementById("app").placeholder = `e.g. ${app}`;
     var dockerfile = `# build\n${buildsAndDependencies}\n\n# run\n${envPortsAndRun}\n\n# made with ❤️ on Docker UP!\n`;
     dockerfileText.innerHTML = dockerfile;
     Prism.highlightElement(dockerfileText);
