@@ -73,12 +73,32 @@ function dockerup() {
                           'COPY . .';
         var goBuildModules = "RUN go mod download";
         var goBuildFinal = `RUN go build -o app ${app}`;
-        var goRunSpec = "ROM alpine:latest\n"            +
+        var goRunSpec = "FROM alpine:latest\n"            +
                         "COPY --from=builder /build .\n" +
                         'ENTRYPOINT ["./app"]';
 
         if (goModules != "") {buildsAndDependencies = goBuildBase + "\n" + goBuildModules + "\n" + goBuildFinal;} else {buildsAndDependencies = goBuildBase + "\n" + goBuildFinal;}
         envPortsAndRun = envAndPorts + goRunSpec;
+        break;
+
+      case "rust":
+        if (app == "") {app = "app-name";}
+        var rustBuildSpec = 'FROM rust:1.65.0-slim as builder\n'                             +
+                            'WORKDIR /build\n'                                               +
+                            `RUN USER=root cargo new ${app}\n`                               +
+                            `COPY Cargo.* /build/${app}/\n`                                  +
+                            `WORKDIR /build/${app}\n`                                        +
+                            'RUN rustup target add x86_64-unknown-linux-musl\n'              +
+                            'RUN cargo build --target x86_64-unknown-linux-musl --release\n' +
+                            `COPY src /build/${app}/src/\n`                                  +
+                            `RUN touch /build/${app}/src/main.rs\n`                          +
+                            'RUN cargo build --target x86_64-unknown-linux-musl --release';
+        var rustRunSpec = "FROM alpine:latest\n"                                                                  +
+                          `COPY --from=builder /build/${app}/target/x86_64-unknown-linux-musl/release/${app} .\n` +
+                          `ENTRYPOINT ["./${app}"]`;
+
+        buildsAndDependencies = rustBuildSpec;
+        envPortsAndRun = envAndPorts + rustRunSpec;
         break;
 
       case "node":
