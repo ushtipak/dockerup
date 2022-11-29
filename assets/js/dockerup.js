@@ -1,6 +1,6 @@
 // Hide additional options for specific languags (versions, dependencies...)
 function hideUnusedOptions() {
-  const languages = ["py", "go", "node", "ruby", "perl"];
+  const languages = ["py", "java", "go", "node", "ruby", "perl"];
   languages.forEach(
     (l) => {document.getElementById(`hidden-${l}`).setAttribute("hidden", "");}
     );
@@ -34,31 +34,81 @@ function dockerup() {
 
   // if language is chosen, pre-hide specific, non-selected options
   if (language != "") {
+    var dockerfile = "";
     hideUnusedOptions();
 
     switch(language) {
       case "python":
         if (app == "") {app = "app.py";}
         document.getElementById("hidden-py").removeAttribute("hidden");
-
         var pyVersion = document.getElementById('py-version').value;
         var pyRequirements = document.getElementById('py-requirements').value;
 
-        var pythonBuildSpec = `FROM python:${pyVersion}-alpine\n` +
-                              'WORKDIR /app\n'                    +
-                              'RUN apk add build-base\n'          +
-                              'COPY . .\n'                        +
-                              'ENV PYTHONUNBUFFERED=1';
-        var pythonBuildVenv = 'ENV VIRTUAL_ENV=/venv\n'                              +
-                              'RUN python -m venv $VIRTUAL_ENV\n'                    +
-                              'ENV PATH="$VIRTUAL_ENV/bin:$PATH"\n'                  +
-                              'RUN pip3 install --upgrade pip\n'                     +
-                              'RUN pip3 install --no-cache-dir wheel\n'              +
-                              'RUN pip3 install --no-cache-dir -r requirements.txt';
-        var pythonRunSpec = `ENTRYPOINT ["python", "${app}"]`;
+        dockerfile = '# build\n' +
+                     `FROM python:${pyVersion}-alpine\n` +
+                     'WORKDIR /app\n' +
+                     'RUN apk add build-base\n' +
+                     'COPY . .\n' +
+                     'ENV PYTHONUNBUFFERED=1\n';
+        // integrate requirements install, if selected
+        if (pyRequirements != "") {
+          dockerfile += 'ENV VIRTUAL_ENV=/venv\n' +
+                        'RUN python -m venv $VIRTUAL_ENV\n' +
+                        'ENV PATH="$VIRTUAL_ENV/bin:$PATH"\n' +
+                        'RUN pip3 install --upgrade pip\n' +
+                        'RUN pip3 install --no-cache-dir wheel\n' +
+                        'RUN pip3 install --no-cache-dir -r requirements.txt\n';
+        }
+        dockerfile += '\n# run\n' +
+                      `${envAndPorts}ENTRYPOINT ["python", "${app}"]`;
+        break;
 
-        if (pyRequirements != "") {buildsAndDependencies = pythonBuildSpec + "\n" + pythonBuildVenv;} else {buildsAndDependencies = pythonBuildSpec;}
-        envPortsAndRun = envAndPorts + pythonRunSpec;
+      case "java":
+        if (app == '') {app = 'org.domain.App'}
+        document.getElementById("hidden-java").removeAttribute("hidden");
+        var javaVersion = document.getElementById('java-version').value;
+        var javaBuild = document.getElementById('java-build').value;
+
+        // differentiate Apache Maven and Gradle Build Tool
+        if (javaBuild == 'maven') {
+           dockerfile = '# build\n' +
+                        `FROM maven:3-eclipse-temurin-${javaVersion}-alpine AS builder\n` +
+                        'WORKDIR /build\n' +
+                        'COPY . .\n' +
+                        'RUN mvn clean package -DskipTests -Djar.finalName=app dependency:copy-dependencies -DoutputDirectory=target/app-dependencies\n' +
+                        '\n# run\n' +
+                        `FROM eclipse-temurin:${javaVersion}-alpine\n` +
+                        'WORKDIR /app\n' +
+                        'COPY --from=builder /build/target/app.jar .\n' +
+                        'COPY --from=builder /build/target/app-dependencies app-dependencies\n' +
+                        `${envAndPorts}` +
+                        `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
+        } else {
+          // Official Gradle image for JDK 19 is still not avaiable, so we fallback to 17; JDK8 Gradle image is only avaiable based on for Ubuntu
+          var buildFrom;
+          switch (javaVersion) {
+            case '19': buildFrom = 'FROM gradle:3-eclipse-temurin-jdk17-alpine AS builder\n# Gradle 19 is still not available (https://hub.docker.com/_/gradle/)\n'
+            break;
+            case '17':
+            case '11':  buildFrom = `FROM gradle:3-eclipse-temurin-jdk${javaVersion}-alpine AS builder\n`
+            break;
+            case '8':  buildFrom = 'FROM gradle:3-eclipse-temurin-jdk8-jammy AS builder\n'
+            break;
+          }
+            dockerfile = '# build\n' +
+                         `${buildFrom}` +
+                         'WORKDIR /build\n' +
+                         'COPY . .\n' +
+                         'RUN gradle build\n' +
+                         'RUN tar xf build/distributions/complete.tar\n' +
+                         '\n# run\n' +
+                         `FROM eclipse-temurin:${javaVersion}-alpine\n` +
+                         'WORKDIR /app\n' +
+                         'COPY --from=builder /build/build/libs/*.jar app.jar\n' +
+                         'COPY --from=builder /build/complete/lib app-dependencies\n' +
+                         `${envAndPorts}` +
+                         `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
+          };
         break;
 
       case "go":
@@ -67,39 +117,39 @@ function dockerup() {
         var goVersion = document.getElementById('go-version').value;
         var goModules = document.getElementById('go-modules').value;
 
-        var goBuildBase = `FROM golang:${goVersion}-alpine AS builder\n` +
-                          'WORKDIR /build\n'                             +
-                          'RUN apk add build-base\n'                     +
-                          'COPY . .';
-        var goBuildModules = "RUN go mod download";
-        var goBuildFinal = `RUN go build -o app ${app}`;
-        var goRunSpec = "FROM alpine:latest\n"            +
-                        "COPY --from=builder /build .\n" +
-                        'ENTRYPOINT ["./app"]';
-
-        if (goModules != "") {buildsAndDependencies = goBuildBase + "\n" + goBuildModules + "\n" + goBuildFinal;} else {buildsAndDependencies = goBuildBase + "\n" + goBuildFinal;}
-        envPortsAndRun = envAndPorts + goRunSpec;
+        dockerfile = '# build\n' +
+                     `FROM golang:${goVersion}-alpine AS builder\n` +
+                     'WORKDIR /build\n' +
+                     'RUN apk add build-base\n' +
+                     'COPY . .\n';
+        if (goModules != "") {dockerfile += "RUN go mod download\n";}
+        dockerfile += `RUN go build -o app ${app}\n` +
+                      '\n# run\n' +
+                      "FROM alpine:latest\n" +
+                      "COPY --from=builder /build .\n" +
+                      `${envAndPorts}` +
+                      'ENTRYPOINT ["./app"]';
         break;
 
       case "rust":
         if (app == "") {app = "app-name";}
-        var rustBuildSpec = 'FROM rust:1.65.0-slim as builder\n'                             +
-                            'WORKDIR /build\n'                                               +
-                            `RUN USER=root cargo new ${app}\n`                               +
-                            `COPY Cargo.* /build/${app}/\n`                                  +
-                            `WORKDIR /build/${app}\n`                                        +
-                            'RUN rustup target add x86_64-unknown-linux-musl\n'              +
-                            'RUN cargo build --target x86_64-unknown-linux-musl --release\n' +
-                            `COPY src /build/${app}/src/\n`                                  +
-                            `RUN touch /build/${app}/src/main.rs\n`                          +
-                            'RUN cargo build --target x86_64-unknown-linux-musl --release';
-        var rustRunSpec = "FROM alpine:latest\n"                                                                  +
-                          `COPY --from=builder /build/${app}/target/x86_64-unknown-linux-musl/release/${app} .\n` +
-                          `ENTRYPOINT ["./${app}"]`;
-
-        buildsAndDependencies = rustBuildSpec;
-        envPortsAndRun = envAndPorts + rustRunSpec;
-        break;
+        dockerfile = '# build\n' +
+                     'FROM rust:1.65.0-slim as builder\n' +
+                     'WORKDIR /build\n' +
+                     `RUN USER=root cargo new ${app}\n` +
+                     `COPY Cargo.* /build/${app}/\n` +
+                     `WORKDIR /build/${app}\n` +
+                     'RUN rustup target add x86_64-unknown-linux-musl\n' +
+                     'RUN cargo build --target x86_64-unknown-linux-musl --release\n' +
+                     `COPY src /build/${app}/src/\n` +
+                     `RUN touch /build/${app}/src/main.rs\n` +
+                     'RUN cargo build --target x86_64-unknown-linux-musl --release\n' +
+                     '\n# run\n' +
+                     "FROM alpine:latest\n"                                                                  +
+                     `COPY --from=builder /build/${app}/target/x86_64-unknown-linux-musl/release/${app} .\n` +
+                     `${envAndPorts}` +
+                     `ENTRYPOINT ["./${app}"]`;
+       break;
 
       case "node":
         if (app == "") {app = "server.js";}
@@ -107,15 +157,16 @@ function dockerup() {
         var nodeVersion = document.getElementById('node-version').value;
         var nodeEnv = document.getElementById('node-env').value;
 
-        var nodeBuildSpec = `FROM node:${nodeVersion}-alpine\n` +
-                            'WORKDIR /app\n'                    +
-                            'COPY . .\n'                        +
-                            `ENV NODE_ENV=${nodeEnv}\n`         +
-                            'RUN npm install';
-        var nodeRunSpec = `ENTRYPOINT ["node", "${app}"]`;
-
-        if (nodeEnv == "production") {buildsAndDependencies = nodeBuildSpec + ' --production';} else {buildsAndDependencies = nodeBuildSpec;}
-        envPortsAndRun = envAndPorts + nodeRunSpec;
+        dockerfile = '# build\n' +
+                     `FROM node:${nodeVersion}-alpine\n` +
+                     'WORKDIR /app\n'                    +
+                     'COPY . .\n'                        +
+                     `ENV NODE_ENV=${nodeEnv}\n`         +
+                     'RUN npm install';
+        if (nodeEnv == "production") {dockerfile += ' --production\n';} else {dockerfile += "\n";}
+        dockerfile += '\n# run\n' +
+                      `${envAndPorts}` +
+                      `ENTRYPOINT ["node", "${app}"]`;
         break;
 
       case "ruby":
@@ -124,13 +175,14 @@ function dockerup() {
         var rubyVersion = document.getElementById('ruby-version').value;
         var rubyGemfile = document.getElementById('ruby-gemfile').value;
 
-        var rubyBuildSpec = `FROM ruby:${rubyVersion}-alpine\n` +
-                            "WORKDIR /app\n"                    +
-                            "COPY . .";
-        var rubyRunSpec = `ENTRYPOINT ["ruby", "${app}"]`;
-
-        if (rubyGemfile != "") {buildsAndDependencies = rubyBuildSpec + '\nRUN bundle install --without development test';} else {buildsAndDependencies = rubyBuildSpec;}
-        envPortsAndRun = envAndPorts + rubyRunSpec;
+        dockerfile = '# build\n' +
+                     `FROM ruby:${rubyVersion}-alpine\n` +
+                     "WORKDIR /app\n" +
+                     "COPY . .\n";
+        if (rubyGemfile != "") {dockerfile += 'RUN bundle install --without development test\n';}
+        dockerfile += '\n# run\n' +
+                      `${envAndPorts}` +
+                      `ENTRYPOINT ["ruby", "${app}"]`;
         break;
 
       case "perl":
@@ -139,51 +191,47 @@ function dockerup() {
         var perlVersion = document.getElementById("perl-version").value;
         var perlModules = document.getElementById("perl-modules").value;
 
-        var perlBuildSpec = `FROM perl:${perlVersion}-slim\n` +
-                            "WORKDIR /app\n"                  +
-                            "COPY . .";
-        var perlRunSpec = `ENTRYPOINT ["perl", "${app}"]`;
-
-        if (perlModules != "") {buildsAndDependencies = perlBuildSpec + "\nRUN cpanm --installdeps .";} else {buildsAndDependencies = perlBuildSpec;}
-        envPortsAndRun = envAndPorts + perlRunSpec;
+        dockerfile = '# build\n' +
+                     `FROM perl:${perlVersion}-slim\n` +
+                     "WORKDIR /app\n" +
+                     "COPY . .\n";
+        if (perlModules != "") {dockerfile += "RUN cpanm --installdeps .\n";}
+        dockerfile += '\n# run\n' +
+                      `${envAndPorts}` +
+                      `ENTRYPOINT ["perl", "${app}"]`;
         break;
 
       case "c":
         if (app == "") {app = "main.c";}
-
-        var cBuildSpec = 'FROM gcc:latest AS builder\n' +
-                         "WORKDIR /build\n"             +
-                         "COPY . .\n"                   +
-                         `RUN gcc -o app ${app}`;
-        var cRunSpec = "FROM alpine:latest\n"               +
-                       "WORKDIR /app\n"                     +
-                       "RUN apk add libc6-compat\n"         +
-                       "COPY --from=builder /build/app .\n" +
-                       'ENTRYPOINT ["./app"]';
-
-        buildsAndDependencies = cBuildSpec;
-        envPortsAndRun = envAndPorts + cRunSpec;
+        dockerfile = '# build\n' +
+                     'FROM gcc:latest AS builder\n' +
+                     "WORKDIR /build\n" +
+                     "COPY . .\n" +
+                     `RUN gcc -o app ${app}\n` +
+                     '\n# run\n' +
+                     "FROM alpine:latest\n" +
+                     "WORKDIR /app\n" +
+                     "RUN apk add libc6-compat\n" +
+                     "COPY --from=builder /build/app .\n" +
+                     `${envAndPorts}` +
+                     'ENTRYPOINT ["./app"]';
         break;
 
       case "elixir":
         if (app == "") {app = "phx.server";}
-
-        var elixirBuildSpec = 'FROM elixir:latest\n' +
-                              'WORKDIR /app\n'       +
-                              'COPY . .\n'           +
-                              'RUN mix local.hex --force';
-        var elixirRunSpec = `ENTRYPOINT ["mix", "${app}"]`;
-
-        buildsAndDependencies = elixirBuildSpec;
-        envPortsAndRun = envAndPorts + elixirRunSpec;
+        dockerfile = '# build\n' +
+                     'FROM elixir:latest\n' +
+                     'WORKDIR /app\n'       +
+                     'COPY . .\n'           +
+                     'RUN mix local.hex --force\n' +
+                     '\n# run\n' +
+                     `${envAndPorts}` +
+                     `ENTRYPOINT ["mix", "${app}"]`;
         break;
-
-      default:
     }
 
     document.getElementById("app").placeholder = `e.g. ${app}`;
-    var dockerfile = `# build\n${buildsAndDependencies}\n\n# run\n${envPortsAndRun}\n\n# made with ❤️ on Docker UP!\n`;
-    dockerfileText.innerHTML = dockerfile;
+    dockerfileText.innerHTML = `${dockerfile}\n\n# made with ❤️ on Docker UP!\n`;
     Prism.highlightElement(dockerfileText);
   }
 }

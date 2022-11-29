@@ -140,6 +140,7 @@
                     <select class="custom-select" name="language" id="language" onchange="dockerup();">
                       <option selected></option>
                       <option value="python">Python</option>
+                      <option value="java">Java</option>
                       <option value="go">Go</option>
                       <option value="rust">Rust</option>
                       <option value="node">Node</option>
@@ -152,7 +153,7 @@
                 </div>
                 <div class="col">
                   <div class="mb-3">
-                    <label for="app">Main app file</label>
+                    <label for="app">Main app</label>
                     <input type="text" name="app" class="form-control" id="app" aria-describedby="app" placeholder="e.g. app.*" onkeyup="dockerup();">
                   </div>
                 </div>
@@ -177,6 +178,29 @@
                     <select class="custom-select" name="py-requirements" id="py-requirements" onchange="dockerup();">
                       <option selected value="3.11">requirements.txt</option>
                       <option value="">none</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row" id="hidden-java" hidden="">
+                <div class="col">
+                  <div class="form-group mb-3 formbuilder-required">
+                    <label for="java-build">Build automation</label>
+                    <select class="custom-select" name="java-build" id="java-build" onchange="dockerup();">
+                      <option selected value="maven">maven</option>
+                      <option value="gradle">gradle</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group mb-3 formbuilder-required">
+                    <label for="java-version">JDK version</label>
+                    <select class="custom-select" name="java-version" id="java-version" onchange="dockerup();">
+                      <option selected value="19">19</option>
+                      <option value="17">17</option>
+                      <option value="11">11</option>
+                      <option value="8">8</option>
                     </select>
                   </div>
                 </div>
