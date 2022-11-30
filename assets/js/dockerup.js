@@ -51,7 +51,7 @@ function dockerup() {
                      'COPY . .\n' +
                      'ENV PYTHONUNBUFFERED=1\n';
         // integrate requirements install, if selected
-        if (pyRequirements != "") {
+        if (pyRequirements == "requirements.txt") {
           dockerfile += 'ENV VIRTUAL_ENV=/venv\n' +
                         'RUN python -m venv $VIRTUAL_ENV\n' +
                         'ENV PATH="$VIRTUAL_ENV/bin:$PATH"\n' +
@@ -59,8 +59,14 @@ function dockerup() {
                         'RUN pip3 install --no-cache-dir wheel\n' +
                         'RUN pip3 install --no-cache-dir -r requirements.txt\n';
         }
-        dockerfile += '\n# run\n' +
-                      `${envAndPorts}ENTRYPOINT ["python", "${app}"]`;
+        if (pyRequirements == "setup.py") {
+          dockerfile += 'RUN python setup.py install\n' +
+                        '\n# run\n' +
+                        `${envAndPorts}ENTRYPOINT ["${app}"]`;
+        } else {
+          dockerfile += '\n# run\n' +
+                        `${envAndPorts}ENTRYPOINT ["python", "${app}"]`;
+        }
         break;
 
       case "java":
