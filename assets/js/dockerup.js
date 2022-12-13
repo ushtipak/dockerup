@@ -45,9 +45,8 @@ function dockerup() {
         var pyRequirements = document.getElementById('py-requirements').value;
 
         dockerfile = '# build\n' +
-                     `FROM python:${pyVersion}-alpine\n` +
+                     `FROM python:${pyVersion}-slim\n` +
                      'WORKDIR /app\n' +
-                     'RUN apk add build-base\n' +
                      'COPY . .\n' +
                      'ENV PYTHONUNBUFFERED=1\n';
         // integrate requirements install, if selected
