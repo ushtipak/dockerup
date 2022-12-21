@@ -130,7 +130,7 @@ function dockerup() {
         if (goModules != "") {dockerfile += "RUN go mod download\n";}
         dockerfile += `RUN go build -o app ${app}\n` +
                       '\n# run\n' +
-                      "FROM alpine:latest\n" +
+                      "FROM alpine:3.17\n" +
                       "COPY --from=builder /build .\n" +
                       `${envAndPorts}` +
                       'ENTRYPOINT ["./app"]';
@@ -150,7 +150,7 @@ function dockerup() {
                      `RUN touch /build/${app}/src/main.rs\n` +
                      'RUN cargo build --target x86_64-unknown-linux-musl --release\n' +
                      '\n# run\n' +
-                     "FROM alpine:latest\n"                                                                  +
+                     "FROM alpine:3.17\n"                                                                  +
                      `COPY --from=builder /build/${app}/target/x86_64-unknown-linux-musl/release/${app} .\n` +
                      `${envAndPorts}` +
                      `ENTRYPOINT ["./${app}"]`;
@@ -214,7 +214,7 @@ function dockerup() {
                      "COPY . .\n" +
                      `RUN gcc -o app ${app}\n` +
                      '\n# run\n' +
-                     "FROM alpine:latest\n" +
+                     "FROM alpine:3.17\n" +
                      "WORKDIR /app\n" +
                      "RUN apk add libc6-compat\n" +
                      "COPY --from=builder /build/app .\n" +
