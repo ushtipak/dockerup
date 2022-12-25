@@ -168,7 +168,7 @@ function dockerup() {
                      'COPY . .\n'                        +
                      `ENV NODE_ENV=${nodeEnv}\n`         +
                      'RUN npm install';
-        if (nodeEnv == "production") {dockerfile += ' --production\n';} else {dockerfile += "\n";}
+        if (nodeEnv == "production") {dockerfile += ' --omit=dev\n';} else {dockerfile += "\n";}
         dockerfile += '\n# run\n' +
                       `${envAndPorts}` +
                       `ENTRYPOINT ["node", "${app}"]`;
