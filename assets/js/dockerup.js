@@ -81,6 +81,7 @@ function dockerup() {
                         'WORKDIR /build\n' +
                         'COPY . .\n' +
                         'RUN mvn clean package -DskipTests -Djar.finalName=app dependency:copy-dependencies -DoutputDirectory=target/app-dependencies\n' +
+                        'RUN if [[ ! -f target/app.jar ]]; then mv target/*.jar target/app.jar; fi\n' +
                         '\n# run\n' +
                         `FROM eclipse-temurin:${javaVersion}-alpine\n` +
                         'WORKDIR /app\n' +
