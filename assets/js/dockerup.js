@@ -140,7 +140,7 @@ function dockerup() {
       case "rust":
         if (app == "") {app = "app-name";}
         dockerfile = '# build\n' +
-                     'FROM rust:1.65.0-slim as builder\n' +
+                     'FROM rust:1.66.1-slim as builder\n' +
                      'WORKDIR /build\n' +
                      `RUN USER=root cargo new ${app}\n` +
                      `COPY Cargo.* /build/${app}/\n` +
