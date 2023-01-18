@@ -74,7 +74,7 @@ function dockerup() {
         var javaVersion = document.getElementById('java-version').value;
         var javaBuild = document.getElementById('java-build').value;
 
-        // differentiate Apache Maven and Gradle Build Tool
+        // differentiate Apache Maven and Gradle Build Tool, Spring Boot and "plain" Java
         if (javaBuild == 'maven') {
            dockerfile = '# build\n' +
                         `FROM maven:3-eclipse-temurin-${javaVersion}-alpine AS builder\n` +
@@ -89,20 +89,10 @@ function dockerup() {
                         'COPY --from=builder /build/target/app-dependencies app-dependencies\n' +
                         `${envAndPorts}` +
                         `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
-        } else {
-          // Official Gradle image for JDK 19 is still not avaiable, so we fallback to 17; JDK8 Gradle image is only avaiable based on for Ubuntu
-          var buildFrom;
-          switch (javaVersion) {
-            case '19': buildFrom = 'FROM gradle:3-eclipse-temurin-jdk17-alpine AS builder\n# Gradle 19 is still not available (https://hub.docker.com/_/gradle/)\n'
-            break;
-            case '17':
-            case '11':  buildFrom = `FROM gradle:3-eclipse-temurin-jdk${javaVersion}-alpine AS builder\n`
-            break;
-            case '8':  buildFrom = 'FROM gradle:3-eclipse-temurin-jdk8-jammy AS builder\n'
-            break;
-          }
+        };
+        if (javaBuild == 'gradle') {
             dockerfile = '# build\n' +
-                         `${buildFrom}` +
+                         `FROM eclipse-temurin:${javaVersion}-alpine as builder\n` +
                          'WORKDIR /build\n' +
                          'COPY . .\n' +
                          'RUN gradle build\n' +
@@ -114,6 +104,32 @@ function dockerup() {
                          'COPY --from=builder /build/complete/lib app-dependencies\n' +
                          `${envAndPorts}` +
                          `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
+          };
+          if (javaBuild == 'maven-springboot') {
+             dockerfile = '# build\n' +
+                          `FROM maven:3-eclipse-temurin-${javaVersion}-alpine AS builder\n` +
+                          'WORKDIR /build\n' +
+                          'COPY . .\n' +
+                          'RUN mvn clean package -DskipTests\n' +
+                          '\n# run\n' +
+                          `FROM eclipse-temurin:${javaVersion}-alpine\n` +
+                          'WORKDIR /app\n' +
+                          `COPY --from=builder /build/target/${app}-*-SNAPSHOT.jar app.jar\n` +
+                          `${envAndPorts}` +
+                          'ENTRYPOINT ["java", "-jar", "app.jar"]'
+          };
+          if (javaBuild == 'gradle-springboot') {
+             dockerfile = '# build\n' +
+                          `FROM eclipse-temurin:${javaVersion}-alpine as builder\n` +
+                          'WORKDIR /build\n' +
+                          'COPY . .\n' +
+                          'RUN ./gradlew build --no-daemon\n' +
+                          '\n# run\n' +
+                          `FROM eclipse-temurin:${javaVersion}-alpine\n` +
+                          'WORKDIR /app\n' +
+                          `COPY --from=builder /build/build/libs/${app}-*-SNAPSHOT.jar app.jar\n` +
+                          `${envAndPorts}` +
+                          'ENTRYPOINT ["java", "-jar", "app.jar"]'
           };
         break;
 

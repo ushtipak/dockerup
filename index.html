@@ -190,8 +190,10 @@
                   <div class="form-group mb-3 formbuilder-required">
                     <label for="java-build">Build automation</label>
                     <select class="custom-select" name="java-build" id="java-build" onchange="dockerup();">
-                      <option selected value="maven">maven</option>
-                      <option value="gradle">gradle</option>
+                      <option selected value="maven">Maven</option>
+                      <option value="gradle">Gradle</option>
+                      <option value="maven-springboot">Maven (Spring Boot)</option>
+                      <option value="gradle-springboot">Gradle (Spring Boot)</option>
                     </select>
                   </div>
                 </div>
@@ -199,10 +201,9 @@
                   <div class="form-group mb-3 formbuilder-required">
                     <label for="java-version">JDK version</label>
                     <select class="custom-select" name="java-version" id="java-version" onchange="dockerup();">
-                      <option selected value="19">19</option>
-                      <option value="17">17</option>
+                      <option value="19">19</option>
+                      <option selected value="17">17</option>
                       <option value="11">11</option>
-                      <option value="8">8</option>
                     </select>
                   </div>
                 </div>
