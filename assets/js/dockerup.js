@@ -95,7 +95,7 @@ function dockerup() {
                          `FROM eclipse-temurin:${javaVersion}-alpine as builder\n` +
                          'WORKDIR /build\n' +
                          'COPY . .\n' +
-                         'RUN gradle build\n' +
+                         'RUN ./gradlew build --no-daemon\n' +
                          'RUN tar xf build/distributions/complete.tar\n' +
                          '\n# run\n' +
                          `FROM eclipse-temurin:${javaVersion}-alpine\n` +
@@ -120,10 +120,10 @@ function dockerup() {
           };
           if (javaBuild == 'gradle-springboot') {
              dockerfile = '# build\n' +
-                          `FROM eclipse-temurin:${javaVersion}-alpine as builder\n` +
+                          `FROM gradle:jdk${javaVersion}-alpine as builder\n` +
                           'WORKDIR /build\n' +
                           'COPY . .\n' +
-                          'RUN ./gradlew build --no-daemon\n' +
+                          'RUN gradle build --no-daemon\n' +
                           '\n# run\n' +
                           `FROM eclipse-temurin:${javaVersion}-alpine\n` +
                           'WORKDIR /app\n' +
