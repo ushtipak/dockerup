@@ -69,44 +69,30 @@ function dockerup() {
         break;
 
       case "java":
-        if (app == '') {app = 'org.domain.App'}
+        if (app == '') {app = 'javatemp'}
         document.getElementById("hidden-java").removeAttribute("hidden");
         var javaVersion = document.getElementById('java-version').value;
         var javaBuild = document.getElementById('java-build').value;
+        var javaSnapshot = document.getElementById('java-snapshot').value;
+        var javaArchive = document.getElementById('java-archive').value;
 
         // differentiate Apache Maven and Gradle Build Tool, Spring Boot and "plain" Java
         if (javaBuild == 'maven') {
-           dockerfile = '# build\n' +
+          dockerfile = '# build\n' +
                         `FROM maven:3-eclipse-temurin-${javaVersion}-alpine AS builder\n` +
                         'WORKDIR /build\n' +
                         'COPY . .\n' +
                         'RUN mvn clean package -DskipTests -Djar.finalName=app dependency:copy-dependencies -DoutputDirectory=target/app-dependencies\n' +
-                        'RUN if [[ ! -f target/app.jar ]]; then mv target/*.jar target/app.jar; fi\n' +
                         '\n# run\n' +
                         `FROM eclipse-temurin:${javaVersion}-alpine\n` +
                         'WORKDIR /app\n' +
-                        'COPY --from=builder /build/target/app.jar .\n' +
+                        `COPY --from=builder /build/target/*${javaSnapshot}.${javaArchive} app.jar\n` +
                         'COPY --from=builder /build/target/app-dependencies app-dependencies\n' +
                         `${envAndPorts}` +
-                        `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
-        };
-        if (javaBuild == 'gradle') {
-            dockerfile = '# build\n' +
-                         `FROM eclipse-temurin:${javaVersion}-alpine as builder\n` +
-                         'WORKDIR /build\n' +
-                         'COPY . .\n' +
-                         'RUN ./gradlew build --no-daemon\n' +
-                         'RUN tar xf build/distributions/complete.tar\n' +
-                         '\n# run\n' +
-                         `FROM eclipse-temurin:${javaVersion}-alpine\n` +
-                         'WORKDIR /app\n' +
-                         'COPY --from=builder /build/build/libs/*.jar app.jar\n' +
-                         'COPY --from=builder /build/complete/lib app-dependencies\n' +
-                         `${envAndPorts}` +
-                         `ENTRYPOINT ["java", "-cp", "app.jar:app-dependencies/*", "${app}"]`
+                        `ENTRYPOINT ["java", "-cp", "app.${javaArchive}:app-dependencies/*", "${app}"]`
           };
-          if (javaBuild == 'maven-springboot') {
-             dockerfile = '# build\n' +
+          if (javaBuild == 'springboot-maven') {
+            dockerfile = '# build\n' +
                           `FROM maven:3-eclipse-temurin-${javaVersion}-alpine AS builder\n` +
                           'WORKDIR /build\n' +
                           'COPY . .\n' +
@@ -114,12 +100,12 @@ function dockerup() {
                           '\n# run\n' +
                           `FROM eclipse-temurin:${javaVersion}-alpine\n` +
                           'WORKDIR /app\n' +
-                          `COPY --from=builder /build/target/${app}-*-SNAPSHOT.jar app.jar\n` +
+                          `COPY --from=builder /build/target/${app}-*${javaSnapshot}.${javaArchive} app.${javaArchive}\n` +
                           `${envAndPorts}` +
-                          'ENTRYPOINT ["java", "-jar", "app.jar"]'
+                          `ENTRYPOINT ["java", "-jar", "app.${javaArchive}"]`
           };
-          if (javaBuild == 'gradle-springboot') {
-             dockerfile = '# build\n' +
+          if (javaBuild == 'springboot-gradle') {
+            dockerfile = '# build\n' +
                           `FROM gradle:jdk${javaVersion}-alpine as builder\n` +
                           'WORKDIR /build\n' +
                           'COPY . .\n' +
@@ -127,9 +113,9 @@ function dockerup() {
                           '\n# run\n' +
                           `FROM eclipse-temurin:${javaVersion}-alpine\n` +
                           'WORKDIR /app\n' +
-                          `COPY --from=builder /build/build/libs/${app}-*-SNAPSHOT.jar app.jar\n` +
+                          `COPY --from=builder /build/build/libs/${app}-*${javaSnapshot}.${javaArchive} app.${javaArchive}\n` +
                           `${envAndPorts}` +
-                          'ENTRYPOINT ["java", "-jar", "app.jar"]'
+                          `ENTRYPOINT ["java", "-jar", "app.${javaArchive}"]`
           };
         break;
 

@@ -65,7 +65,7 @@
           <div>
             <a href="#dockerize-me" class="btn btn-lg btn-primary btn-block mb-2">Dockerize my app</a>
           </div>
-          <small>v2.9.51</small>
+          <small>v2.9.54</small>
         </div>
       </div>
       <div class="decoration-wrapper d-none d-sm-block">
@@ -191,9 +191,8 @@
                     <label for="java-build">Build automation</label>
                     <select class="custom-select" name="java-build" id="java-build" onchange="dockerup();">
                       <option selected value="maven">Maven</option>
-                      <option value="gradle">Gradle</option>
-                      <option value="maven-springboot">Maven (Spring Boot)</option>
-                      <option value="gradle-springboot">Gradle (Spring Boot)</option>
+                      <option value="springboot-maven">Maven (Spring Boot)</option>
+                      <option value="springboot-gradle">Gradle (Spring Boot)</option>
                     </select>
                   </div>
                 </div>
@@ -203,7 +202,24 @@
                     <select class="custom-select" name="java-version" id="java-version" onchange="dockerup();">
                       <option value="19">19</option>
                       <option selected value="17">17</option>
-                      <option value="11">11</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group mb-3 formbuilder-required">
+                    <label for="java-snapshot">Snapshot</label>
+                    <select class="custom-select" name="java-snapshot" id="java-snapshot" onchange="dockerup();">
+                      <option selected value="-SNAPSHOT">True</option>
+                      <option value="">False</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group mb-3 formbuilder-required">
+                    <label for="java-archive">Package</label>
+                    <select class="custom-select" name="java-archive" id="java-archive" onchange="dockerup();">
+                      <option selected value="jar">JAR</option>
+                      <option value="war">WAR</option>
                     </select>
                   </div>
                 </div>
