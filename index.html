@@ -65,7 +65,7 @@
           <div>
             <a href="#dockerize-me" class="btn btn-lg btn-primary btn-block mb-2">Dockerize my app</a>
           </div>
-          <small>v2.9.54</small>
+          <small>v2.9.61</small>
         </div>
       </div>
       <div class="decoration-wrapper d-none d-sm-block">
@@ -145,8 +145,6 @@
                       <option value="go">Go</option>
                       <option value="rust">Rust</option>
                       <option value="node">Node</option>
-                      <option value="ruby">Ruby</option>
-                      <option value="perl">Perl</option>
                       <option value="c">C</option>
                       <option value="elixir">Elixir</option>
                     </select>
@@ -264,50 +262,6 @@
                     <select class="custom-select" name="node-env" id="node-env" onchange="dockerup();">
                       <option selected value="development">development</option>
                       <option value="production">production</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row" id="hidden-ruby" hidden="">
-                <div class="col">
-                  <div class="form-group mb-3 formbuilder-required">
-                    <label for="ruby-version">Version</label>
-                    <select class="custom-select" name="ruby-version" id="ruby-version" onchange="dockerup();">
-                      <option selected value="3.1.2">3.1.2</option>
-                      <option value="3.0.4">3.0.4</option>
-                      <option value="2.7.6">2.7.6</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group mb-3 formbuilder-required">
-                    <label for="ruby-gemfile">Packages</label>
-                    <select class="custom-select" name="ruby-gemfile" id="ruby-gemfile" onchange="dockerup();">
-                      <option selected value="gemfile">Gemfile</option>
-                      <option value="">none</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row" id="hidden-perl" hidden="">
-                <div class="col">
-                  <div class="form-group mb-3 formbuilder-required">
-                    <label for="perl-version">Version</label>
-                    <select class="custom-select" name="perl-version" id="perl-version" onchange="dockerup();">
-                      <option selected value="5.36">5.36</option>
-                      <option value="5.34">5.34</option>
-                      <option value="5.32">5.32</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="form-group mb-3 formbuilder-required">
-                    <label for="perl-modules">Packages</label>
-                    <select class="custom-select" name="perl-modules" id="perl-modules" onchange="dockerup();">
-                      <option value="cpanm">cpanm</option>
-                      <option selected value="">none</option>
                     </select>
                   </div>
                 </div>

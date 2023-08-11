@@ -1,6 +1,6 @@
 // Hide additional options for specific languags (versions, dependencies...)
 function hideUnusedOptions() {
-  const languages = ["py", "java", "go", "node", "ruby", "perl"];
+  const languages = ["py", "java", "go", "node"];
   languages.forEach(
     (l) => {document.getElementById(`hidden-${l}`).setAttribute("hidden", "");}
     );
@@ -175,38 +175,6 @@ function dockerup() {
         dockerfile += '\n# run\n' +
                       `${envAndPorts}` +
                       `ENTRYPOINT ["node", "${app}"]`;
-        break;
-
-      case "ruby":
-        if (app == "") {app = "main.rb";}
-        document.getElementById("hidden-ruby").removeAttribute("hidden");
-        var rubyVersion = document.getElementById('ruby-version').value;
-        var rubyGemfile = document.getElementById('ruby-gemfile').value;
-
-        dockerfile = '# build\n' +
-                     `FROM ruby:${rubyVersion}-alpine\n` +
-                     "WORKDIR /app\n" +
-                     "COPY . .\n";
-        if (rubyGemfile != "") {dockerfile += 'RUN bundle install --without development test\n';}
-        dockerfile += '\n# run\n' +
-                      `${envAndPorts}` +
-                      `ENTRYPOINT ["ruby", "${app}"]`;
-        break;
-
-      case "perl":
-        if (app == "") {app = "main.pl";}
-        document.getElementById("hidden-perl").removeAttribute("hidden");
-        var perlVersion = document.getElementById("perl-version").value;
-        var perlModules = document.getElementById("perl-modules").value;
-
-        dockerfile = '# build\n' +
-                     `FROM perl:${perlVersion}-slim\n` +
-                     "WORKDIR /app\n" +
-                     "COPY . .\n";
-        if (perlModules != "") {dockerfile += "RUN cpanm --installdeps .\n";}
-        dockerfile += '\n# run\n' +
-                      `${envAndPorts}` +
-                      `ENTRYPOINT ["perl", "${app}"]`;
         break;
 
       case "c":
