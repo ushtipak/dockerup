@@ -139,6 +139,25 @@ function dockerup() {
                       'ENTRYPOINT ["./app"]';
         break;
 
+      case "react":
+        if (app == "") {app = "N / A";}
+        dockerfile = '# build\n' +
+                      'FROM node:18-alpine AS builder\n' +
+                      "WORKDIR /build\n" +
+                      "COPY . .\n" +
+                      "RUN npm install\n" +
+                      "RUN npm run build\n" +
+                      '\n# run\n' +
+                      "FROM nginx:1.25-alpine\n" +
+                      "WORKDIR /opt/app\n" +
+                      "COPY --from=builder /build/build/ .\n" +
+                      "COPY --from=builder /build/nginx.conf /etc/nginx/conf.d/default.conf\n" +
+                      `${envAndPorts}` +
+                      'EXPOSE 8080\n' +
+                      "\n# download Nginx config and place beside Dockerile:\n" +
+                      "# https://dockerup.dev/assets/nginx.conf\n";
+        break;
+
       case "rust":
         if (app == "") {app = "app-name";}
         dockerfile = '# build\n' +
